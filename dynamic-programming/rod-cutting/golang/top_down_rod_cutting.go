@@ -1,0 +1,56 @@
+package main
+
+import (
+	"fmt"
+	"math"
+)
+
+func cutRod(prices []int, length int) int {
+	results := make([]int, length+1)
+
+	for i := range length + 1 {
+		results[i] = -math.MaxInt64
+	}
+
+	return cutRodInternal(prices, results, length)
+}
+
+func cutRodInternal(prices, results []int, length int) int {
+	if results[length] > -math.MaxInt64 {
+		return results[length]
+	}
+
+	result := -math.MaxInt64
+	if length == 0 {
+		result = 0
+	} else {
+		for i := 1; i < length+1; i++ {
+			result = max(result, prices[i]+cutRodInternal(prices, results, length-i))
+		}
+	}
+
+	results[length] = result
+
+	return result
+}
+
+func main() {
+	prices := []int{0, 1, 5, 8, 9, 10, 17, 17, 20, 24, 30}
+
+	fmt.Print("  i |")
+	for i := range prices {
+		fmt.Printf("%3d|", i)
+	}
+	fmt.Print("\n")
+	fmt.Print("p[i]|")
+	for _, p := range prices {
+		fmt.Printf("%3d|", p)
+	}
+	fmt.Print("\n")
+
+	for i := range prices {
+		result := cutRod(prices, i)
+
+		fmt.Printf("length = %d / result = %d\n", i, result)
+	}
+}
