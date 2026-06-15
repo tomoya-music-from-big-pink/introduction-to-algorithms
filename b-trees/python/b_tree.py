@@ -77,6 +77,21 @@ class Tree:
                         x.keys[i] = key_to_lift
 
                         self.__remove_internal(x.children[i + 1], key)
+                    else:
+                        y = x.children[i]
+                        z = x.children[i + 1]
+
+                        y.keys.append(x.keys[i])
+                        y.keys.extend(z.keys)
+                        y.n = len(y.keys)
+
+                        x.keys.pop(i)
+                        x.children.pop(i)
+                        x.n -= 1
+                        if x.n == 0:
+                            self.root = y
+
+                        self.__remove_internal(y, key)
         else:
             self.__remove_internal(x.children[i], key)
 
