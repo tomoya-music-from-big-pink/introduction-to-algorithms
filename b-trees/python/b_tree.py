@@ -64,15 +64,19 @@ class Tree:
                         key_to_lift = y.keys[-1]
 
                         y.keys = y.keys[:-1]
-                        y.n -= 1
+                        y.keys.append(x.keys[i])
                         x.keys[i] = key_to_lift
+
+                        self.__remove_internal(x.children[i], key)
                     elif x.children[i + 1].n >= self.min_degree:
                         y = x.children[i + 1]
                         key_to_lift = y.keys[0]
 
                         y.keys = y.keys[1:]
-                        y.n -= 1
+                        y.keys.insert(0, x.keys[i])
                         x.keys[i] = key_to_lift
+
+                        self.__remove_internal(x.children[i + 1], key)
         else:
             self.__remove_internal(x.children[i], key)
 
