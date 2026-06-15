@@ -56,6 +56,87 @@ func (t *Tree) insertNonFull(x *Element, key int) {
 	}
 }
 
+func (t *Tree) contains(key int) bool {
+	return t.root.containsInternal(key)
+}
+
+func (x *Element) containsInternal(key int) bool {
+	var i int
+	for i = 0; i < x.n && x.keys[i] < key; i++ {
+	}
+
+	if i < x.n && x.keys[i] == key {
+		return true
+	} else {
+		if x.isLeaf {
+			return false
+		} else {
+			return x.children[i].containsInternal(key)
+		}
+	}
+}
+
+func (t *Tree) remove(key int) {
+	if !t.contains(key) {
+		fmt.Printf("%d is not found in the tree.\n", key)
+
+		return
+	}
+
+	t.root.removeIntenal(t, key)
+}
+
+func (x *Element) removeIntenal(t *Tree, key int) {
+	var i int
+	for i = 0; i < x.n && x.keys[i] < key; i++ {
+	}
+
+	if i < x.n {
+		if x.keys[i] == key {
+			if x.isLeaf {
+				x.keys = append(x.keys[:i], x.keys[i+1:]...)
+				x.n--
+			} else {
+				if x.children[i].n >= t.minDegree {
+					y := x.children[i]
+					keyToLift := y.keys[len(y.keys)-1]
+
+					y.keys = append([]int{}, append(y.keys[:t.minDegree-1], []int{x.keys[i]}...)...)
+
+					x.keys[i] = keyToLift
+
+					x.children[i].removeIntenal(t, key)
+				} else if x.children[i+1].n >= t.minDegree {
+					y := x.children[i+1]
+					keyToLift := y.keys[0]
+
+					y.keys = append([]int{x.keys[i]}, y.keys[1:]...)
+
+					x.keys[i] = keyToLift
+
+					x.children[i+1].removeIntenal(t, key)
+				} else {
+					y := x.children[i]
+					z := x.children[i+1]
+
+					y.keys = append([]int{}, append(y.keys, []int{x.keys[i]}...)...)
+					y.keys = append([]int{}, append(y.keys, z.keys...)...)
+					y.n = len(y.keys)
+
+					x.keys = append(x.keys[:i], x.keys[i+1:]...)
+					x.children = append(x.children[:i+1], x.children[i+2:]...)
+					x.n = len(x.keys)
+					if x.n == 0 {
+						t.root = y
+					}
+
+					y.removeIntenal(t, key)
+				}
+			}
+		}
+	}
+}
+
 func (t *Tree) splitChild(x *Element, i int) {
 	y := x.children[i]
 	z := &Element{}
@@ -103,9 +184,13 @@ func main() {
 	t.insert(5)
 	t.insert(9)
 	t.insert(3)
-	t.insert(7)
+	//t.insert(7)
 	t.insert(1)
-	//t.insert(5)
+	//t.insert(2)
+	//t.insert(8)
+	//t.insert(6)
+	//t.insert(0)
+	//t.insert(4)
 
 	for {
 		fmt.Print("1:insert 2:remove 3:print > ")
@@ -122,6 +207,7 @@ func main() {
 			fmt.Print("input key > ")
 			var key int
 			fmt.Scanf("%d", &key)
+			t.remove(key)
 		case 3:
 			t.printTree()
 		default:
