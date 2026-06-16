@@ -53,47 +53,82 @@ class Tree:
         while i < x.n and x.keys[i] < key:
             i += 1
 
-        if i < x.n:
-            if x.keys[i] == key:
-                if x.is_leaf:
-                    x.keys.pop(i)
-                    x.n -= 1
+        if i < x.n and x.keys[i] == key:
+            if x.is_leaf:
+                x.keys.pop(i)
+                x.n -= 1
+            else:
+                if x.children[i].n >= self.min_degree:
+                    y = x.children[i]
+                    key_to_lift = y.keys[-1]
+
+                    y.keys = y.keys[:-1]
+                    y.keys.append(x.keys[i])
+                    x.keys[i] = key_to_lift
+
+                    self.__remove_internal(x.children[i], key)
+                elif x.children[i + 1].n >= self.min_degree:
+                    y = x.children[i + 1]
+                    key_to_lift = y.keys[0]
+
+                    y.keys = y.keys[1:]
+                    y.keys.insert(0, x.keys[i])
+                    x.keys[i] = key_to_lift
+
+                    self.__remove_internal(x.children[i + 1], key)
                 else:
-                    if x.children[i].n >= self.min_degree:
-                        y = x.children[i]
-                        key_to_lift = y.keys[-1]
+                    y = x.children[i]
+                    z = x.children[i + 1]
 
-                        y.keys = y.keys[:-1]
-                        y.keys.append(x.keys[i])
-                        x.keys[i] = key_to_lift
+                    y.keys.append(x.keys[i])
+                    y.keys.extend(z.keys)
+                    y.n = len(y.keys)
 
-                        self.__remove_internal(x.children[i], key)
-                    elif x.children[i + 1].n >= self.min_degree:
-                        y = x.children[i + 1]
-                        key_to_lift = y.keys[0]
+                    x.keys.pop(i)
+                    x.children.pop(i)
+                    x.n -= 1
+                    if x.n == 0:
+                        self.root = y
 
-                        y.keys = y.keys[1:]
-                        y.keys.insert(0, x.keys[i])
-                        x.keys[i] = key_to_lift
-
-                        self.__remove_internal(x.children[i + 1], key)
-                    else:
-                        y = x.children[i]
-                        z = x.children[i + 1]
-
-                        y.keys.append(x.keys[i])
-                        y.keys.extend(z.keys)
-                        y.n = len(y.keys)
-
-                        x.keys.pop(i)
-                        x.children.pop(i)
-                        x.n -= 1
-                        if x.n == 0:
-                            self.root = y
-
-                        self.__remove_internal(y, key)
+                    self.__remove_internal(y, key)
         else:
-            self.__remove_internal(x.children[i], key)
+            if x.children[i].n == self.min_degree - 1:
+                if i > 0 and x.children[i - 1].n >= self.min_degree:
+                    y = x.children[i]
+                    z = x.children[i - 1]
+                    key_to_lift = z.keys[-1]
+                    key_to_drop = x.keys[i - 1]
+
+                    z.keys = z.keys[:-1]
+                    z.n -= 1
+                    y.keys.insert(0, key_to_drop)
+                    y.n += 1
+                    x.keys[i - 1] = key_to_lift
+
+                    if not y.is_leaf:
+                        children_to_move = z.children[-1]
+                        y.children.insert(0, children_to_move)
+                        z.children = z.children[:-1]
+                elif i < x.n and x.children[i + 1].n >= self.min_degree:
+                    y = x.children[i]
+                    z = x.children[i + 1]
+                    key_to_lift = z.keys[0]
+                    key_to_drop = x.keys[i]
+
+                    z.keys = z.keys[1:]
+                    z.n -= 1
+                    y.keys.append(key_to_drop)
+                    y.n += 1
+                    x.keys[i] = key_to_lift
+
+                    if not y.is_leaf:
+                        children_to_move = z.children[0]
+                        y.children.append(children_to_move)
+                        z.children = z.children[1:]
+
+                self.__remove_internal(x.children[i], key)
+            else:
+                self.__remove_internal(x.children[i], key)
 
     def __insert_key_non_full(self, x, key):
         if x.is_leaf:
