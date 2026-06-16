@@ -125,8 +125,51 @@ class Tree:
                         children_to_move = z.children[0]
                         y.children.append(children_to_move)
                         z.children = z.children[1:]
+                else:
+                    if i > 0:
+                        y = x.children[i]
+                        z = x.children[i - 1]
+                        key_to_drop = x.keys[i - 1]
 
-            self.__remove_internal(x.children[i], key)
+                        z.keys.append(key_to_drop)
+                        z.n += 1
+                        z.keys.extend(y.keys)
+                        z.n += y.n
+
+                        if not y.is_leaf:
+                            z.children.extend(y.children)
+
+                        x.keys.pop(i - 1)
+                        x.n -= 1
+                        x.children.pop(i)
+
+                        if x.n == 0:
+                            self.root = z
+
+                        self.__remove_internal(z, key)
+                    elif i < x.n:
+                        y = x.children[i]
+                        z = x.children[i + 1]
+                        key_to_drop = x.keys[i]
+
+                        z.keys.insert(0, key_to_drop)
+                        z.n += 1
+                        z.keys = y.keys + z.keys
+                        z.n += y.n
+
+                        if not y.is_leaf:
+                            z.children = y.children + z.children
+
+                        x.keys.pop(i)
+                        x.n -= 1
+                        x.children.pop(i)
+
+                        if x.n == 0:
+                            self.root = z
+
+                        self.__remove_internal(z, key)
+            else:
+                self.__remove_internal(x.children[i], key)
 
     def __insert_key_non_full(self, x, key):
         if x.is_leaf:
