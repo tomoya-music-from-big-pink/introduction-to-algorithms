@@ -126,9 +126,7 @@ class Tree:
                         y.children.append(children_to_move)
                         z.children = z.children[1:]
 
-                self.__remove_internal(x.children[i], key)
-            else:
-                self.__remove_internal(x.children[i], key)
+            self.__remove_internal(x.children[i], key)
 
     def __insert_key_non_full(self, x, key):
         if x.is_leaf:
@@ -195,8 +193,8 @@ if __name__ == "__main__":
     t.insert(5)
     t.insert(9)
     t.insert(3)
-    t.insert(7)
-    # t.insert(1)
+    # t.insert(7)
+    t.insert(1)
     # t.insert(2)
     # t.insert(8)
     # t.insert(6)

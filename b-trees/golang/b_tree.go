@@ -91,49 +91,87 @@ func (x *Element) removeIntenal(t *Tree, key int) {
 	for i = 0; i < x.n && x.keys[i] < key; i++ {
 	}
 
-	if i < x.n {
-		if x.keys[i] == key {
-			if x.isLeaf {
-				x.keys = append(x.keys[:i], x.keys[i+1:]...)
-				x.n--
+	if i < x.n && x.keys[i] == key {
+		if x.isLeaf {
+			x.keys = append(x.keys[:i], x.keys[i+1:]...)
+			x.n--
+		} else {
+			if x.children[i].n >= t.minDegree {
+				y := x.children[i]
+				keyToLift := y.keys[len(y.keys)-1]
+
+				y.keys = append([]int{}, append(y.keys[:t.minDegree-1], []int{x.keys[i]}...)...)
+
+				x.keys[i] = keyToLift
+
+				x.children[i].removeIntenal(t, key)
+			} else if x.children[i+1].n >= t.minDegree {
+				y := x.children[i+1]
+				keyToLift := y.keys[0]
+
+				y.keys = append([]int{x.keys[i]}, y.keys[1:]...)
+
+				x.keys[i] = keyToLift
+
+				x.children[i+1].removeIntenal(t, key)
 			} else {
-				if x.children[i].n >= t.minDegree {
-					y := x.children[i]
-					keyToLift := y.keys[len(y.keys)-1]
+				y := x.children[i]
+				z := x.children[i+1]
 
-					y.keys = append([]int{}, append(y.keys[:t.minDegree-1], []int{x.keys[i]}...)...)
+				y.keys = append([]int{}, append(y.keys, []int{x.keys[i]}...)...)
+				y.keys = append([]int{}, append(y.keys, z.keys...)...)
+				y.n = len(y.keys)
 
-					x.keys[i] = keyToLift
+				x.keys = append(x.keys[:i], x.keys[i+1:]...)
+				x.children = append(x.children[:i+1], x.children[i+2:]...)
+				x.n = len(x.keys)
+				if x.n == 0 {
+					t.root = y
+				}
 
-					x.children[i].removeIntenal(t, key)
-				} else if x.children[i+1].n >= t.minDegree {
-					y := x.children[i+1]
-					keyToLift := y.keys[0]
+				y.removeIntenal(t, key)
+			}
+		}
+	} else {
+		if x.children[i].n == t.minDegree-1 {
+			if i > 0 && x.children[i-1].n >= t.minDegree {
+				y := x.children[i]
+				z := x.children[i-1]
+				keyToLift := z.keys[len(z.keys)-1]
+				keyToDrop := x.keys[i-1]
 
-					y.keys = append([]int{x.keys[i]}, y.keys[1:]...)
+				y.keys = append([]int{keyToDrop}, y.keys...)
+				y.n++
+				z.keys = append([]int{}, z.keys[:len(z.keys)-1]...)
+				z.n--
+				x.keys[i-1] = keyToLift
 
-					x.keys[i] = keyToLift
+				if !y.isLeaf {
+					childrenToMove := z.children[len(z.children)-1]
+					y.children = append([]*Element{childrenToMove}, y.children...)
+					z.children = append([]*Element{}, z.children[1:]...)
+				}
+			} else if i < x.n && x.children[i+1].n >= t.minDegree {
+				y := x.children[i]
+				z := x.children[i+1]
+				keyToLift := z.keys[0]
+				keyToDrop := x.keys[i]
 
-					x.children[i+1].removeIntenal(t, key)
-				} else {
-					y := x.children[i]
-					z := x.children[i+1]
+				y.keys = append([]int{}, append(y.keys, []int{keyToDrop}...)...)
+				y.n++
+				z.keys = append([]int{}, z.keys[1:]...)
+				z.n--
+				x.keys[i] = keyToLift
 
-					y.keys = append([]int{}, append(y.keys, []int{x.keys[i]}...)...)
-					y.keys = append([]int{}, append(y.keys, z.keys...)...)
-					y.n = len(y.keys)
-
-					x.keys = append(x.keys[:i], x.keys[i+1:]...)
-					x.children = append(x.children[:i+1], x.children[i+2:]...)
-					x.n = len(x.keys)
-					if x.n == 0 {
-						t.root = y
-					}
-
-					y.removeIntenal(t, key)
+				if !y.isLeaf {
+					childrenToMove := z.children[0]
+					y.children = append(y.children, childrenToMove)
+					z.children = append([]*Element{}, z.children[1:]...)
 				}
 			}
 		}
+
+		x.children[i].removeIntenal(t, key)
 	}
 }
 
