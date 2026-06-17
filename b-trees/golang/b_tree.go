@@ -122,6 +122,10 @@ func (x *Element) removeIntenal(t *Tree, key int) {
 				y.keys = append([]int{}, append(y.keys, z.keys...)...)
 				y.n = len(y.keys)
 
+				if !y.isLeaf {
+					y.children = append([]*Element{}, append(y.children, z.children...)...)
+				}
+
 				x.keys = append(x.keys[:i], x.keys[i+1:]...)
 				x.children = append(x.children[:i+1], x.children[i+2:]...)
 				x.n = len(x.keys)
@@ -151,6 +155,8 @@ func (x *Element) removeIntenal(t *Tree, key int) {
 					y.children = append([]*Element{childrenToMove}, y.children...)
 					z.children = append([]*Element{}, z.children[1:]...)
 				}
+
+				y.removeIntenal(t, key)
 			} else if i < x.n && x.children[i+1].n >= t.minDegree {
 				y := x.children[i]
 				z := x.children[i+1]
@@ -168,10 +174,60 @@ func (x *Element) removeIntenal(t *Tree, key int) {
 					y.children = append(y.children, childrenToMove)
 					z.children = append([]*Element{}, z.children[1:]...)
 				}
-			}
-		}
 
-		x.children[i].removeIntenal(t, key)
+				y.removeIntenal(t, key)
+			} else {
+				if i > 0 {
+					y := x.children[i]
+					z := x.children[i-1]
+					keyToDrop := x.keys[i-1]
+
+					z.keys = append(z.keys, []int{keyToDrop}...)
+					z.n++
+					z.keys = append(z.keys, append([]int{}, y.keys...)...)
+					z.n += y.n
+
+					if !y.isLeaf {
+						z.children = append(z.children, append([]*Element{}, y.children...)...)
+					}
+
+					x.keys = append(x.keys[:i-1], append([]int{}, x.keys[i:]...)...)
+					x.n--
+					x.children = append(x.children[:i], append([]*Element{}, x.children[i+1:]...)...)
+
+					if x.n == 0 {
+						t.root = z
+					}
+
+					z.removeIntenal(t, key)
+				} else if i < x.n {
+					y := x.children[i]
+					z := x.children[i+1]
+					keyToDrop := x.keys[i]
+
+					y.keys = append(y.keys, []int{keyToDrop}...)
+					y.n++
+					y.keys = append(y.keys, append([]int{}, z.keys...)...)
+					y.n += z.n
+
+					if !y.isLeaf {
+						y.children = append(y.children, append([]*Element{}, z.children...)...)
+					}
+
+					x.keys = append(x.keys[:i], append([]int{}, x.keys[i+1:]...)...)
+					x.n -= 1
+					x.children = append(x.children[:i+1], append([]*Element{}, x.children[i+2:]...)...)
+
+					if x.n == 0 {
+						t.root = y
+					}
+
+					y.removeIntenal(t, key)
+				}
+			}
+		} else {
+			x.children[i].removeIntenal(t, key)
+		}
 	}
 }
 
@@ -222,13 +278,13 @@ func main() {
 	t.insert(5)
 	t.insert(9)
 	t.insert(3)
-	//t.insert(7)
+	t.insert(7)
 	t.insert(1)
-	//t.insert(2)
-	//t.insert(8)
-	//t.insert(6)
-	//t.insert(0)
-	//t.insert(4)
+	t.insert(2)
+	t.insert(8)
+	t.insert(6)
+	t.insert(0)
+	t.insert(4)
 
 	for {
 		fmt.Print("1:insert 2:remove 3:print > ")
