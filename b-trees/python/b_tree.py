@@ -46,6 +46,8 @@ class Tree:
         if not x:
             print(f"{key} is not found in the tree.")
 
+            return
+
         self.__remove_internal(self.root, key)
 
     def __remove_internal(self, x, key):
@@ -84,8 +86,11 @@ class Tree:
                     y.keys.extend(z.keys)
                     y.n = len(y.keys)
 
+                    if not y.is_leaf:
+                        y.children.extend(z.children)
+
                     x.keys.pop(i)
-                    x.children.pop(i)
+                    x.children.pop(i + 1)
                     x.n -= 1
                     if x.n == 0:
                         self.root = y
@@ -109,6 +114,8 @@ class Tree:
                         children_to_move = z.children[-1]
                         y.children.insert(0, children_to_move)
                         z.children = z.children[:-1]
+
+                    self.__remove_internal(y, key)
                 elif i < x.n and x.children[i + 1].n >= self.min_degree:
                     y = x.children[i]
                     z = x.children[i + 1]
@@ -125,6 +132,8 @@ class Tree:
                         children_to_move = z.children[0]
                         y.children.append(children_to_move)
                         z.children = z.children[1:]
+
+                    self.__remove_internal(y, key)
                 else:
                     if i > 0:
                         y = x.children[i]
@@ -236,13 +245,13 @@ if __name__ == "__main__":
     t.insert(5)
     t.insert(9)
     t.insert(3)
-    # t.insert(7)
+    t.insert(7)
     t.insert(1)
-    # t.insert(2)
-    # t.insert(8)
-    # t.insert(6)
-    # t.insert(0)
-    # t.insert(4)
+    t.insert(2)
+    t.insert(8)
+    t.insert(6)
+    t.insert(0)
+    t.insert(4)
 
     while True:
         print("1:insert 2:remove 3:print > ", end="")
