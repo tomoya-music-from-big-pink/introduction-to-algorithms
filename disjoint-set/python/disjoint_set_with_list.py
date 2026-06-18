@@ -34,6 +34,10 @@ def union(ch1, ch2, sets):
         x.tail.next = y.head
         x.tail = y.tail
         del sets[ch2]
+    else:
+        y.tail.next = x.head
+        y.tail = x.tail
+        del sets[ch1]
 
 
 def find_set(data, sets):
