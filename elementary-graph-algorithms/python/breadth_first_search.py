@@ -57,6 +57,7 @@ if __name__ == "__main__":
     edges.append(Edge("x", "u"))
     edges.append(Edge("x", "y"))
     edges.append(Edge("u", "t"))
+    edges.append(Edge("u", "x"))
     edges.append(Edge("u", "y"))
     edges.append(Edge("y", "x"))
     edges.append(Edge("y", "u"))
