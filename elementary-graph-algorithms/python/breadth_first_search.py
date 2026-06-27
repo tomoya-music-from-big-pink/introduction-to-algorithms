@@ -27,11 +27,11 @@ def breadth_first_search(graph, s):
         u.color = Color.BLACK
 
 
-def print_path(vertices, s, v, v_name):
+def print_path(s, v, v_name):
     if v == s:
         print(s.name, end=" -> " if v.name != v_name else "")
     elif v.predecessor:
-        print_path(vertices, s, v.predecessor, v_name)
+        print_path(s, v.predecessor, v_name)
         print(v.name, end=" -> " if v.name != v_name else "")
 
 
@@ -74,5 +74,5 @@ if __name__ == "__main__":
     for u in vertices.values():
         print(f"{u.name} ({u.distance}) : ", end="")
         if u != vertices["s"]:
-            print_path(vertices, vertices["s"], u, u.name)
+            print_path(vertices["s"], u, u.name)
         print("")
