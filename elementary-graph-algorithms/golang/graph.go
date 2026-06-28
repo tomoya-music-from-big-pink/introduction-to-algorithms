@@ -3,9 +3,9 @@ package main
 import "fmt"
 
 type Vertex struct {
-	name            string
-	predecessor     *Vertex
-	distance, color int
+	name                                  string
+	predecessor                           *Vertex
+	distance, start_time, end_time, color int
 }
 
 type Edge struct {
